@@ -61,17 +61,17 @@ class neutron::agents::ovsml2 (
   }
 
   neutron_plugin_ml2 {
-    'AGENT/polling_interval': value => $polling_interval;
-    'OVS/integration_bridge': value => $integration_bridge;
+    'agent/polling_interval': value => $polling_interval;
+    'ovs/integration_bridge': value => $integration_bridge;
   }
 
-  if ($firewall_driver) {
-    neutron_plugin_ml2 { 'SECURITYGROUP/firewall_driver':
-      value => $firewall_driver
-    }
-  } else {
-    neutron_plugin_ml2 { 'SECURITYGROUP/firewall_driver': ensure => absent }
-  }
+  # if ($firewall_driver) {
+  #   neutron_plugin_ml2 { 'securitygroup/firewall_driver':
+  #     value => $firewall_driver
+  #   }
+  # } else {
+  #   neutron_plugin_ml2 { 'securitygroup/firewall_driver': ensure => absent }
+  # }
 
   vs_bridge { $integration_bridge:
     ensure => present,
@@ -84,9 +84,9 @@ class neutron::agents::ovsml2 (
       before => Service['neutron-plugin-ovs-service'],
     }
     neutron_plugin_ml2 {
-      'OVS/enable_tunneling': value => true;
-      'OVS/tunnel_bridge':    value => $tunnel_bridge;
-      'OVS/local_ip':         value => $local_ip;
+      'ovs/enable_tunneling': value => true;
+      'ovs/tunnel_bridge':    value => $tunnel_bridge;
+      'ovs/local_ip':         value => $local_ip;
     }
 
     if size($tunnel_types) > 0 {
@@ -102,15 +102,15 @@ class neutron::agents::ovsml2 (
     }
   } else {
     neutron_plugin_ml2 {
-      'OVS/enable_tunneling': value  => false;
-      'OVS/tunnel_bridge':    ensure => absent;
-      'OVS/local_ip':         ensure => absent;
+      'ovs/enable_tunneling': value  => false;
+      'ovs/tunnel_bridge':    ensure => absent;
+      'ovs/local_ip':         ensure => absent;
     }
   }
 
 
   if $::neutron::params::ovs_agent_package {
-    Package['neutron-plugin-ovs-agent'] -> Neutron_plugin_ovs<||>
+    Package['neutron-plugin-ovs-agent'] -> Neutron_plugin_ml2<||>
     package { 'neutron-plugin-ovs-agent':
       ensure  => $package_ensure,
       name    => $::neutron::params::ovs_agent_package,
